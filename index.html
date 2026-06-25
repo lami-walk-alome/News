@@ -5,44 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>최신 기사 — NYT &amp; The Economist</title>
 <style>
-  :root {
-    --bg: #f7f5f0; --ink: #1a1a1a; --muted: #6b6b6b; --line: #e3ded4;
-    --accent: #1a1a1a;
-  }
-  /* 매체별 액센트 */
-  body[data-pub="nyt"] { --accent: #000000; --tint:#f1f1f1; }
-  body[data-pub="eco"] { --accent: #e3120b; --tint:#fdeceb; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
-  header { border-bottom: 2px solid var(--ink); padding: 24px 16px 18px; background: var(--bg); position: sticky; top:0; z-index: 5; }
-  .head-inner { max-width: 1000px; margin: 0 auto; }
-  header h1 { font-size: clamp(24px, 5.5vw, 38px); letter-spacing: -0.5px; font-weight: 700; text-align:center; }
-  header p { color: var(--muted); font-size: 13px; margin-top: 6px; text-align:center; font-family: -apple-system, system-ui, sans-serif; }
+  :root { --bg:#f7f5f0; --ink:#1a1a1a; --muted:#6b6b6b; --line:#e3ded4; --accent:#1a1a1a; --tint:#f1f1f1; }
+  body[data-pub="nyt"] { --accent:#000000; --tint:#f1f1f1; }
+  body[data-pub="eco"] { --accent:#e3120b; --tint:#fdeceb; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Georgia,"Times New Roman",serif; background:var(--bg); color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  header { border-bottom:2px solid var(--ink); padding:24px 16px 14px; background:var(--bg); position:sticky; top:0; z-index:5; }
+  .head-inner { max-width:1000px; margin:0 auto; }
+  header h1 { font-size:clamp(24px,5.5vw,38px); letter-spacing:-0.5px; font-weight:700; text-align:center; }
+  header p { color:var(--muted); font-size:13px; margin-top:6px; text-align:center; font-family:-apple-system,system-ui,sans-serif; }
   .pubs { display:flex; gap:10px; justify-content:center; margin-top:16px; }
-  .pub-btn { font-family: -apple-system, system-ui, sans-serif; font-size:14px; font-weight:700; padding:9px 22px; border:1.5px solid var(--ink); background:transparent; color:var(--ink); border-radius:999px; cursor:pointer; transition:.15s; }
+  .pub-btn { font-family:-apple-system,system-ui,sans-serif; font-size:14px; font-weight:700; padding:9px 22px; border:1.5px solid var(--ink); background:transparent; color:var(--ink); border-radius:999px; cursor:pointer; transition:.15s; }
   .pub-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
   .sections { display:flex; gap:8px; overflow-x:auto; padding:14px 4px 4px; max-width:1000px; margin:0 auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
-  .sec-btn { font-family: -apple-system, system-ui, sans-serif; font-size:13px; font-weight:600; white-space:nowrap; padding:7px 14px; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; cursor:pointer; transition:.15s; }
+  .sec-btn { font-family:-apple-system,system-ui,sans-serif; font-size:13px; font-weight:600; white-space:nowrap; padding:7px 14px; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; cursor:pointer; transition:.15s; display:flex; align-items:center; gap:7px; }
   .sec-btn:hover { background:var(--tint); }
   .sec-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .sdot { width:6px; height:6px; border-radius:50%; background:#ccc; flex:0 0 auto; }
+  .sdot.ok { background:#27ae60; }
+  .sdot.err { background:#c0392b; }
+  .sdot.loading { background:#e6a817; animation:pulse 1s infinite; }
+  .sec-btn.active .sdot.ok { background:#fff; }
+  @keyframes pulse { 50%{opacity:.3} }
   .bar { display:flex; align-items:center; gap:12px; max-width:1000px; margin:10px auto 0; padding:0 4px; }
-  .bar .now { font-family: -apple-system, system-ui, sans-serif; font-size:12px; color:var(--muted); }
-  .refresh { margin-left:auto; font-family: -apple-system, system-ui, sans-serif; font-size:13px; font-weight:600; padding:7px 16px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:999px; cursor:pointer; }
+  .bar .now { font-family:-apple-system,system-ui,sans-serif; font-size:12px; color:var(--muted); }
+  .refresh { margin-left:auto; font-family:-apple-system,system-ui,sans-serif; font-size:13px; font-weight:600; padding:7px 16px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:999px; cursor:pointer; }
   .refresh:disabled { opacity:.5; cursor:default; }
   main { max-width:1000px; margin:0 auto; padding:16px 16px 60px; }
   ul { list-style:none; }
   li.item { border-bottom:1px solid var(--line); padding:14px 0; display:flex; gap:14px; }
-  li.item .num { font-family: -apple-system, system-ui, sans-serif; font-size:13px; font-weight:700; color:var(--accent); min-width:26px; padding-top:2px; }
+  li.item .num { font-family:-apple-system,system-ui,sans-serif; font-size:13px; font-weight:700; color:var(--accent); min-width:26px; padding-top:2px; }
   li.item .body { min-width:0; }
   li.item a { color:var(--ink); text-decoration:none; font-size:17px; font-weight:600; display:block; }
   li.item a:hover { text-decoration:underline; }
-  li.item .desc { font-family: Georgia, serif; font-size:14px; color:#444; margin-top:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  li.item .meta { font-family: -apple-system, system-ui, sans-serif; font-size:12px; color:var(--muted); margin-top:5px; }
-  .status { font-family: -apple-system, system-ui, sans-serif; font-size:13px; color:var(--muted); padding:24px 4px; text-align:center; }
+  li.item .desc { font-family:Georgia,serif; font-size:14px; color:#444; margin-top:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  li.item .meta { font-family:-apple-system,system-ui,sans-serif; font-size:12px; color:var(--muted); margin-top:5px; }
+  .status { font-family:-apple-system,system-ui,sans-serif; font-size:13px; color:var(--muted); padding:24px 4px; text-align:center; }
   .status.error { color:#c0392b; }
   .skeleton { height:18px; background:linear-gradient(90deg,#eee,#f5f5f5,#eee); background-size:200% 100%; animation:shimmer 1.2s infinite; border-radius:4px; margin:18px 0; }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  footer { text-align:center; font-family:-apple-system, system-ui, sans-serif; font-size:12px; color:var(--muted); padding:24px 16px 40px; border-top:1px solid var(--line); }
+  .progress { height:3px; background:var(--line); border-radius:2px; max-width:1000px; margin:10px auto 0; overflow:hidden; }
+  .progress > i { display:block; height:100%; width:0; background:var(--accent); transition:width .3s; }
+  footer { text-align:center; font-family:-apple-system,system-ui,sans-serif; font-size:12px; color:var(--muted); padding:24px 16px 40px; border-top:1px solid var(--line); }
 </style>
 </head>
 <body data-pub="nyt">
@@ -54,8 +58,9 @@
     <div class="sections" id="sections"></div>
     <div class="bar">
       <span class="now" id="now"></span>
-      <button class="refresh" id="refreshBtn">새로고침</button>
+      <button class="refresh" id="refreshBtn">전체 새로고침</button>
     </div>
+    <div class="progress"><i id="progbar"></i></div>
   </div>
 </header>
 
@@ -68,39 +73,39 @@
 <script>
 const PUBS = {
   nyt: {
-    name: "NYT",
-    sections: [
-      ["Top Stories", "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"],
-      ["World",        "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"],
-      ["US",           "https://rss.nytimes.com/services/xml/rss/nyt/US.xml"],
-      ["Politics",     "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml"],
-      ["Business",     "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml"],
-      ["Technology",   "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"],
-      ["Science",      "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml"],
-      ["Health",       "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml"],
-      ["Sports",       "https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml"],
-      ["Arts",         "https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml"],
-      ["Books",        "https://rss.nytimes.com/services/xml/rss/nyt/Books.xml"],
-      ["Opinion",      "https://rss.nytimes.com/services/xml/rss/nyt/Opinion.xml"]
+    name:"NYT",
+    sections:[
+      ["Top Stories","https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"],
+      ["World","https://rss.nytimes.com/services/xml/rss/nyt/World.xml"],
+      ["US","https://rss.nytimes.com/services/xml/rss/nyt/US.xml"],
+      ["Politics","https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml"],
+      ["Business","https://rss.nytimes.com/services/xml/rss/nyt/Business.xml"],
+      ["Technology","https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"],
+      ["Science","https://rss.nytimes.com/services/xml/rss/nyt/Science.xml"],
+      ["Health","https://rss.nytimes.com/services/xml/rss/nyt/Health.xml"],
+      ["Sports","https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml"],
+      ["Arts","https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml"],
+      ["Books","https://rss.nytimes.com/services/xml/rss/nyt/Books.xml"],
+      ["Opinion","https://rss.nytimes.com/services/xml/rss/nyt/Opinion.xml"]
     ]
   },
   eco: {
-    name: "Economist",
-    sections: [
-      ["Latest",                "https://www.economist.com/latest/rss.xml"],
-      ["The world this week",   "https://www.economist.com/the-world-this-week/rss.xml"],
-      ["Leaders",               "https://www.economist.com/leaders/rss.xml"],
-      ["Briefing",              "https://www.economist.com/briefing/rss.xml"],
-      ["United States",         "https://www.economist.com/united-states/rss.xml"],
-      ["China",                 "https://www.economist.com/china/rss.xml"],
-      ["Europe",                "https://www.economist.com/europe/rss.xml"],
-      ["Britain",               "https://www.economist.com/britain/rss.xml"],
-      ["Asia",                  "https://www.economist.com/asia/rss.xml"],
-      ["International",          "https://www.economist.com/international/rss.xml"],
-      ["Business",              "https://www.economist.com/business/rss.xml"],
-      ["Finance & economics",   "https://www.economist.com/finance-and-economics/rss.xml"],
-      ["Science & technology",  "https://www.economist.com/science-and-technology/rss.xml"],
-      ["Culture",               "https://www.economist.com/culture/rss.xml"]
+    name:"Economist",
+    sections:[
+      ["Latest","https://www.economist.com/latest/rss.xml"],
+      ["The world this week","https://www.economist.com/the-world-this-week/rss.xml"],
+      ["Leaders","https://www.economist.com/leaders/rss.xml"],
+      ["Briefing","https://www.economist.com/briefing/rss.xml"],
+      ["United States","https://www.economist.com/united-states/rss.xml"],
+      ["China","https://www.economist.com/china/rss.xml"],
+      ["Europe","https://www.economist.com/europe/rss.xml"],
+      ["Britain","https://www.economist.com/britain/rss.xml"],
+      ["Asia","https://www.economist.com/asia/rss.xml"],
+      ["International","https://www.economist.com/international/rss.xml"],
+      ["Business","https://www.economist.com/business/rss.xml"],
+      ["Finance & economics","https://www.economist.com/finance-and-economics/rss.xml"],
+      ["Science & technology","https://www.economist.com/science-and-technology/rss.xml"],
+      ["Culture","https://www.economist.com/culture/rss.xml"]
     ]
   }
 };
@@ -113,13 +118,14 @@ const PROXIES = [
   { kind:"raw",           build:u=>"https://corsproxy.io/?url="+encodeURIComponent(u) }
 ];
 
-let curPub = "nyt";
-let curSec = 0;
+// cache[pub][sectionIndex] = { state:'idle'|'loading'|'ok'|'err', items:[], error:'' }
+const cache = {};
+let curPub="nyt", curSec=0, loading=false;
 
 function timeAgo(s){ if(!s) return ""; const d=new Date(s); if(isNaN(d)) return ""; const x=(Date.now()-d.getTime())/1000;
   if(x<60) return "방금 전"; if(x<3600) return Math.floor(x/60)+"분 전"; if(x<86400) return Math.floor(x/3600)+"시간 전"; return Math.floor(x/86400)+"일 전"; }
-
 function stripHtml(h){ if(!h) return ""; const t=document.createElement("div"); t.innerHTML=h; return (t.textContent||"").trim(); }
+function bust(url){ return url+(url.includes("?")?"&":"?")+"_t="+Date.now(); }
 
 function parseXml(xml){
   const doc=new DOMParser().parseFromString(xml,"text/xml");
@@ -133,9 +139,6 @@ function parseXml(xml){
   }).filter(x=>x.title&&x.link);
 }
 
-// 캐시 우회용 타임스탬프 부착
-function bust(url){ return url + (url.includes("?")?"&":"?") + "_t=" + Date.now(); }
-
 async function fetchFeed(feedUrl){
   let lastErr=null;
   for(const p of PROXIES){
@@ -148,12 +151,9 @@ async function fetchFeed(feedUrl){
         if(d.status!=="ok"||!d.items) throw new Error("bad json");
         items=d.items.map(x=>({title:x.title,link:x.link,date:x.pubDate,desc:stripHtml(x.description||"")}));
       } else if(p.kind==="json-contents"){
-        const d=await res.json();
-        if(!d.contents) throw new Error("no contents");
+        const d=await res.json(); if(!d.contents) throw new Error("no contents");
         items=parseXml(d.contents);
-      } else {
-        items=parseXml(await res.text());
-      }
+      } else { items=parseXml(await res.text()); }
       if(items.length) return items.slice(0,30);
       throw new Error("empty");
     }catch(e){ lastErr=e; }
@@ -167,7 +167,7 @@ function renderPubs(){
     const b=document.createElement("button");
     b.className="pub-btn"+(key===curPub?" active":"");
     b.textContent=p.name;
-    b.onclick=()=>{ curPub=key; curSec=0; document.body.dataset.pub=key; renderPubs(); renderSections(); load(); };
+    b.onclick=()=>{ if(loading&&!cache[key]) return; curPub=key; curSec=0; document.body.dataset.pub=key; renderPubs(); renderSections(); showCurrent(); };
     wrap.appendChild(b);
   });
 }
@@ -177,16 +177,30 @@ function renderSections(){
   PUBS[curPub].sections.forEach(([label],i)=>{
     const b=document.createElement("button");
     b.className="sec-btn"+(i===curSec?" active":"");
-    b.textContent=label;
-    b.onclick=()=>{ curSec=i; renderSections(); load(); };
+    const dot=document.createElement("span"); dot.className="sdot";
+    const st=cache[curPub]?.[i]?.state;
+    if(st) dot.classList.add(st==="ok"?"ok":st==="err"?"err":st==="loading"?"loading":"");
+    const txt=document.createElement("span"); txt.textContent=label;
+    b.appendChild(dot); b.appendChild(txt);
+    b.onclick=()=>{ curSec=i; renderSections(); showCurrent(); };
     wrap.appendChild(b);
   });
 }
 
-function renderList(items){
+function showCurrent(){
   const list=document.getElementById("list");
+  const entry=cache[curPub]?.[curSec];
+  if(!entry || entry.state==="idle"){
+    list.innerHTML='<div class="status">대기 중…</div>'; return;
+  }
+  if(entry.state==="loading"){
+    list.innerHTML='<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'; return;
+  }
+  if(entry.state==="err"){
+    list.innerHTML='<div class="status error">불러오기 실패: '+(entry.error||"오류")+'<br>전체 새로고침을 눌러 다시 시도하세요.</div>'; return;
+  }
   const ul=document.createElement("ul");
-  items.forEach((it,i)=>{
+  entry.items.forEach((it,i)=>{
     const li=document.createElement("li"); li.className="item";
     const num=document.createElement("div"); num.className="num"; num.textContent=(i+1);
     const body=document.createElement("div"); body.className="body";
@@ -200,29 +214,61 @@ function renderList(items){
   list.innerHTML=""; list.appendChild(ul);
 }
 
-function renderError(msg){
-  document.getElementById("list").innerHTML='<div class="status error">불러오기 실패: '+msg+'<br>새로고침을 다시 눌러주세요.</div>';
-}
-
-async function load(){
-  const btn=document.getElementById("refreshBtn"); btn.disabled=true;
-  document.getElementById("list").innerHTML='<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
-  document.getElementById("now").textContent="불러오는 중…";
-  const [, url]=PUBS[curPub].sections[curSec];
-  try{
-    const items=await fetchFeed(url);
-    renderList(items);
-    const t=new Date();
-    document.getElementById("now").textContent="갱신: "+t.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" · "+items.length+"건";
-  }catch(e){
-    renderError(e.message||"오류");
-    document.getElementById("now").textContent="";
+// 동시성 제한 풀 (한 번에 limit개씩 처리)
+async function runPool(tasks, limit){
+  let idx=0, done=0;
+  const total=tasks.length;
+  async function worker(){
+    while(idx<tasks.length){
+      const my=idx++;
+      await tasks[my]();
+      done++;
+      document.getElementById("progbar").style.width=Math.round(done/total*100)+"%";
+    }
   }
-  btn.disabled=false;
+  await Promise.all(Array.from({length:Math.min(limit,total)}, worker));
 }
 
-document.getElementById("refreshBtn").addEventListener("click", load);
-renderPubs(); renderSections(); load();
+async function loadAll(){
+  if(loading) return;
+  loading=true;
+  const btn=document.getElementById("refreshBtn"); btn.disabled=true;
+  document.getElementById("progbar").style.width="0%";
+
+  // 모든 섹션을 idle/loading으로 초기화
+  const tasks=[];
+  Object.keys(PUBS).forEach(pub=>{
+    cache[pub]=cache[pub]||[];
+    PUBS[pub].sections.forEach((sec,i)=>{
+      cache[pub][i]={state:"loading",items:[],error:""};
+      const [, url]=sec;
+      tasks.push(async()=>{
+        try{
+          cache[pub][i]={state:"ok",items:await fetchFeed(url),error:""};
+        }catch(e){
+          cache[pub][i]={state:"err",items:[],error:e.message||"오류"};
+        }
+        if(pub===curPub) renderSections();
+        if(pub===curPub && i===curSec) showCurrent();
+      });
+    });
+  });
+
+  renderSections(); showCurrent();
+  document.getElementById("now").textContent="모든 섹션 불러오는 중…";
+
+  await runPool(tasks, 4);
+
+  const t=new Date();
+  document.getElementById("now").textContent="전체 갱신: "+t.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("progbar").style.width="100%";
+  setTimeout(()=>{ document.getElementById("progbar").style.width="0%"; }, 800);
+  renderSections(); showCurrent();
+  btn.disabled=false; loading=false;
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadAll);
+renderPubs(); renderSections(); loadAll();
 </script>
 </body>
 </html>
