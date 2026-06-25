@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>최신 기사 — NYT &amp; The Economist</title>
+<style>
+  :root {
+    --bg: #f7f5f0; --card: #ffffff; --ink: #1a1a1a; --muted: #6b6b6b;
+    --line: #e3ded4; --nyt: #000000; --eco: #e3120b; --accent: #1a1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  header { border-bottom: 2px solid var(--ink); padding: 28px 20px 22px; text-align: center; background: var(--bg); }
+  header h1 { font-size: clamp(26px, 6vw, 42px); letter-spacing: -0.5px; font-weight: 700; }
+  header p { color: var(--muted); font-size: 14px; margin-top: 8px; font-family: -apple-system, system-ui, sans-serif; }
+  .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .tab { font-family: -apple-system, system-ui, sans-serif; font-size: 13px; font-weight: 600; padding: 8px 16px; border: 1px solid var(--ink); background: transparent; color: var(--ink); border-radius: 999px; cursor: pointer; transition: all .15s; }
+  .tab:hover { background: rgba(0,0,0,.05); }
+  .tab.active { background: var(--ink); color: #fff; }
+  .refresh { font-family: -apple-system, system-ui, sans-serif; font-size: 13px; font-weight: 600; padding: 8px 16px; border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 999px; cursor: pointer; }
+  .refresh:disabled { opacity: .5; cursor: default; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+  .source { min-width: 0; }
+  .source.hidden { display: none; }
+  .source-head { display: flex; align-items: baseline; gap: 10px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 14px; }
+  .source-head h2 { font-size: 22px; font-weight: 700; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.nyt { background: var(--nyt); }
+  .dot.eco { background: var(--eco); }
+  .source-head .count { margin-left: auto; font-family: -apple-system, system-ui, sans-serif; font-size: 12px; color: var(--muted); }
+  ul { list-style: none; }
+  li.item { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  li.item a { color: var(--ink); text-decoration: none; font-size: 17px; font-weight: 600; display: block; }
+  li.item a:hover { text-decoration: underline; }
+  li.item .meta { font-family: -apple-system, system-ui, sans-serif; font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .status { font-family: -apple-system, system-ui, sans-serif; font-size: 13px; color: var(--muted); padding: 14px 0; }
+  .status.error { color: var(--eco); }
+  .fallback { font-family: -apple-system, system-ui, sans-serif; font-size: 13px; background: #fff4f3; border: 1px solid #f3c9c6; border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+  .fallback strong { display:block; margin-bottom: 8px; color: var(--ink); }
+  .fallback a { display: inline-block; margin: 3px 6px 3px 0; padding: 5px 10px; background: #fff; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); text-decoration: none; font-size: 12px; }
+  .fallback a:hover { background: #f3efe7; }
+  .skeleton { height: 18px; background: linear-gradient(90deg,#eee,#f5f5f5,#eee); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 4px; margin: 14px 0; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .tip { max-width: 1100px; margin: 16px auto 0; padding: 0 16px; font-family: -apple-system, system-ui, sans-serif; font-size: 12px; color: var(--muted); }
+  .tip div { background: #eef3ef; border: 1px solid #d6e2da; border-radius: 8px; padding: 10px 14px; }
+  footer { text-align: center; font-family: -apple-system, system-ui, sans-serif; font-size: 12px; color: var(--muted); padding: 24px 16px 40px; border-top: 1px solid var(--line); margin-top: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>최신 기사</h1>
+  <p>The New York Times &amp; The Economist · RSS 실시간</p>
+  <div class="controls">
+    <button class="refresh" id="refreshBtn">새로고침</button>
+  </div>
+</header>
+
+<main>
+  <section class="source" id="nyt-section" data-key="nyt">
+    <div class="source-head">
+      <span class="dot nyt"></span>
+      <h2>The New York Times</h2>
+      <span class="count" id="nyt-count"></span>
+    </div>
+    <div id="nyt-body">
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+  </section>
+
+  <section class="source" id="eco-section" data-key="eco">
+    <div class="source-head">
+      <span class="dot eco"></span>
+      <h2>The Economist</h2>
+      <span class="count" id="eco-count"></span>
+    </div>
+    <div id="eco-body">
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  기사 제목과 링크는 각 매체의 공식 RSS 피드에서 가져옵니다. 전문은 해당 매체 사이트에서 확인하세요.
+</footer>
+
+<script>
+const FEEDS = {
+  nyt: {
+    name: "NYT",
+    url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+    fallback: [
+      ["홈페이지", "https://www.nytimes.com"],
+      ["월드", "https://www.nytimes.com/section/world"],
+      ["미국", "https://www.nytimes.com/section/us"],
+      ["비즈니스", "https://www.nytimes.com/section/business"],
+      ["테크", "https://www.nytimes.com/section/technology"]
+    ]
+  },
+  eco: {
+    name: "Economist",
+    url: "https://www.economist.com/latest/rss.xml",
+    fallback: [
+      ["최신", "https://www.economist.com/latest"],
+      ["The world this week", "https://www.economist.com/the-world-this-week"],
+      ["Leaders", "https://www.economist.com/leaders"],
+      ["Finance", "https://www.economist.com/finance-and-economics"],
+      ["Business", "https://www.economist.com/business"]
+    ]
+  }
+};
+
+const PROXIES = [
+  { kind: "json-items",    build: u => "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(u) },
+  { kind: "raw",           build: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
+  { kind: "json-contents", build: u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u) },
+  { kind: "raw",           build: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
+  { kind: "raw",           build: u => "https://corsproxy.io/?url=" + encodeURIComponent(u) }
+];
+
+function timeAgo(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "";
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return "방금 전";
+  if (diff < 3600) return Math.floor(diff/60) + "분 전";
+  if (diff < 86400) return Math.floor(diff/3600) + "시간 전";
+  return Math.floor(diff/86400) + "일 전";
+}
+
+function parseRssXml(xmlText) {
+  const doc = new DOMParser().parseFromString(xmlText, "text/xml");
+  const items = [...doc.querySelectorAll("item, entry")];
+  return items.map(it => {
+    const title = (it.querySelector("title")?.textContent || "").trim();
+    let link = it.querySelector("link")?.textContent?.trim();
+    if (!link) link = it.querySelector("link")?.getAttribute("href") || "";
+    const date = it.querySelector("pubDate, published, updated")?.textContent || "";
+    return { title, link, date };
+  }).filter(x => x.title && x.link);
+}
+
+async function fetchFeed(key) {
+  const feed = FEEDS[key];
+  let lastErr = null;
+  for (const p of PROXIES) {
+    try {
+      const res = await fetch(p.build(feed.url), { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      let items = [];
+      if (p.kind === "json-items") {
+        const data = await res.json();
+        if (data.status !== "ok" || !data.items) throw new Error("bad json");
+        items = data.items.map(x => ({ title: x.title, link: x.link, date: x.pubDate }));
+      } else if (p.kind === "json-contents") {
+        const data = await res.json();
+        if (!data.contents) throw new Error("no contents");
+        items = parseRssXml(data.contents);
+      } else {
+        items = parseRssXml(await res.text());
+      }
+      if (items.length) return items.slice(0, 15);
+      throw new Error("empty");
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error("all proxies failed");
+}
+
+function renderItems(key, items) {
+  const body = document.getElementById(key + "-body");
+  const ul = document.createElement("ul");
+  items.forEach(it => {
+    const li = document.createElement("li");
+    li.className = "item";
+    const a = document.createElement("a");
+    a.href = it.link; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = it.title;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = timeAgo(it.date);
+    li.appendChild(a);
+    if (meta.textContent) li.appendChild(meta);
+    ul.appendChild(li);
+  });
+  body.innerHTML = "";
+  body.appendChild(ul);
+  document.getElementById(key + "-count").textContent = items.length + "건";
+}
+
+function renderFallback(key) {
+  const feed = FEEDS[key];
+  const body = document.getElementById(key + "-body");
+  const links = feed.fallback.map(([label, url]) =>
+    `<a href="${url}" target="_blank" rel="noopener">${label}</a>`).join("");
+  body.innerHTML =
+    '<div class="status error">자동 로딩이 차단되었습니다 (프록시/보안 정책).</div>' +
+    '<div class="fallback"><strong>대신 ' + feed.name + ' 주요 섹션으로 바로 가기:</strong>' +
+    links + '</div>';
+  document.getElementById(key + "-count").textContent = "";
+}
+
+function showLoading(key) {
+  document.getElementById(key + "-body").innerHTML =
+    '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+  document.getElementById(key + "-count").textContent = "";
+}
+
+async function loadAll() {
+  const btn = document.getElementById("refreshBtn");
+  btn.disabled = true;
+  Object.keys(FEEDS).forEach(showLoading);
+  await Promise.all(Object.keys(FEEDS).map(async key => {
+    try { renderItems(key, await fetchFeed(key)); }
+    catch (e) { renderFallback(key); }
+  }));
+  btn.disabled = false;
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadAll);
+loadAll();
+</script>
+</body>
+</html>
